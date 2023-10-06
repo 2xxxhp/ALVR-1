@@ -1,4 +1,3 @@
-<p align="center"> <img width="500" src="resources/alvr_combined_logo_hq.png"/> </p>
 
 # ALVR - Air Light VR
 
