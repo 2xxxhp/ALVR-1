@@ -1,4 +1,4 @@
-use alvr_client_core::ClientCoreEvent;
+use alvr_client_core::{ClientCapabilities, ClientCoreEvent};
 use alvr_common::{
     glam::{Quat, UVec2, Vec3},
     parking_lot::RwLock,
@@ -205,11 +205,15 @@ fn client_thread(
     output_sender: mpsc::Sender<WindowOutput>,
     input_receiver: mpsc::Receiver<WindowInput>,
 ) {
-    alvr_client_core::initialize(
-        UVec2::new(1920, 1832),
-        vec![60.0, 72.0, 80.0, 90.0, 120.0],
-        true,
-    );
+    alvr_client_core::initialize(ClientCapabilities {
+        default_view_resolution: UVec2::new(1920, 1832),
+        external_decoder: true,
+        refresh_rates: vec![60.0, 72.0, 80.0, 90.0, 120.0],
+        foveated_encoding: false,
+        encoder_high_profile: false,
+        encoder_10_bits: false,
+        encoder_av1: false,
+    });
     alvr_client_core::resume();
 
     let streaming = Arc::new(RelaxedAtomic::new(true));
@@ -228,18 +232,16 @@ fn client_thread(
                     window_output.hud_message = message;
                 }
                 ClientCoreEvent::StreamingStarted {
-                    view_resolution,
-                    refresh_rate_hint: fps,
-                    ..
+                    negotiated_config, ..
                 } => {
-                    window_output.fps = fps;
+                    window_output.fps = negotiated_config.refresh_rate_hint;
                     window_output.connected = true;
-                    window_output.resolution = view_resolution;
+                    window_output.resolution = negotiated_config.view_resolution;
 
                     let streaming = Arc::clone(&streaming);
                     let input = Arc::clone(&window_input);
                     maybe_tracking_thread = Some(thread::spawn(move || {
-                        tracking_thread(streaming, fps, input)
+                        tracking_thread(streaming, negotiated_config.refresh_rate_hint, input)
                     }));
                 }
                 ClientCoreEvent::StreamingStopped => {
@@ -249,7 +251,7 @@ fn client_thread(
                     }
                 }
                 ClientCoreEvent::Haptics { .. } => (),
-                ClientCoreEvent::MaybeCreateDecoder { codec, .. } => {
+                ClientCoreEvent::DecoderConfig { codec, .. } => {
                     window_output.decoder_codec = Some(codec)
                 }
                 ClientCoreEvent::FrameReady { timestamp, .. } => {

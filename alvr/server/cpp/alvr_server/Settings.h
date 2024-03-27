@@ -42,7 +42,10 @@ class Settings {
     int m_codec;
     int m_h264Profile;
     bool m_use10bitEncoder;
+    bool m_useFullRangeEncoding;
+    bool m_enablePreAnalysis;
     bool m_enableVbaq;
+    bool m_enableHmqb;
     bool m_usePreproc;
     uint32_t m_preProcSigma;
     uint32_t m_preProcTor;
@@ -73,7 +76,7 @@ class Settings {
     int64_t m_nvencRcAverageBitrate;
     bool m_nvencEnableWeightedPrediction;
 
-    bool m_aggressiveKeyframeResend;
+    uint64_t m_minimumIdrIntervalMs;
 
     bool m_enableViveTrackerProxy = false;
     bool m_TrackingRefOnly = false;
@@ -82,4 +85,6 @@ class Settings {
 
     bool m_enableControllers;
     int m_controllerIsTracker = false;
+    int m_enableBodyTrackingFakeVive = false;
+    int m_bodyTrackingHasLegs = false;
 };

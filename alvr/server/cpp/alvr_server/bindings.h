@@ -15,8 +15,8 @@ struct FfiQuat {
 };
 
 struct FfiHandSkeleton {
-    float jointPositions[26][3];
-    FfiQuat jointRotations[26];
+    float jointPositions[31][3];
+    FfiQuat jointRotations[31];
 };
 
 struct FfiDeviceMotion {
@@ -25,6 +25,13 @@ struct FfiDeviceMotion {
     float position[3];
     float linearVelocity[3];
     float angularVelocity[3];
+};
+
+struct FfiBodyTracker {
+    unsigned int trackerID;
+    FfiQuat orientation;
+    float position[3];
+    unsigned int tracking;
 };
 
 enum FfiOpenvrPropertyType {
@@ -136,7 +143,9 @@ extern "C" void SetTracking(unsigned long long targetTimestampNs,
                             int motionsCount,
                             const FfiHandSkeleton *leftHand,
                             const FfiHandSkeleton *rightHand,
-                            unsigned int controllersTracked);
+                            unsigned int controllersTracked,
+                            const FfiBodyTracker *bodyTrackers,
+                            int bodyTrackersCount);
 extern "C" void VideoErrorReportReceive();
 extern "C" void ShutdownSteamvr();
 
